@@ -1,5 +1,6 @@
 packages_with_clusters.json
 embeddings_pack.json
-faiss_plan.md
+'faiss plan.md'
 howto.markdown
 plan.markdown
+venv
