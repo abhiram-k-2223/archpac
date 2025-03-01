@@ -1,0 +1,116 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArchPac - Package Finder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(to bottom right, #0f172a, #1e293b);
+            background-attachment: fixed;
+        }
+        .terminal-glow {
+            box-shadow: 0 0 20px rgba(51, 102, 153, 0.3);
+        }
+        .arch-blue {
+            color: #1793d1;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1793d1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-gray-100 font-mono">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold arch-blue flex items-center justify-center gap-2">
+                <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L2 19h20L12 2zm0 3.6L18.8 17H5.2L12 5.6z"/>
+                </svg>
+                ArchPac
+            </h1>
+            <p class="text-gray-400 mt-2">Find Arch Linux packages with AI-powered search</p>
+        </header>
+
+        <!-- Search Form -->
+        <div class="max-w-2xl mx-auto mb-8">
+            <form id="searchForm" class="flex gap-2">
+                <input 
+                    type="text" 
+                    name="query" 
+                    id="query" 
+                    placeholder="What are you looking for? (e.g., 'web browser')"
+                    class="w-full bg-gray-800/50 border border-gray-700 rounded-lg p-3 focus:outline-none focus:border-arch-blue text-white placeholder-gray-400"
+                >
+                <button 
+                    type="submit" 
+                    class="bg-arch-blue hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors"
+                >
+                    Search
+                </button>
+            </form>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="max-w-4xl mx-auto">
+            <div id="resultsContainer" class="bg-gray-900/80 rounded-lg p-6 terminal-glow hidden">
+                <h2 id="queryTitle" class="text-xl font-bold mb-4 arch-blue"></h2>
+                <div id="packageList" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const query = document.getElementById('query').value;
+            if (!query) return;
+
+            const response = await fetch('/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `query=${encodeURIComponent(query)}`
+            });
+            
+            const data = await response.json();
+            displayResults(data);
+        });
+
+        function displayResults(data) {
+            const resultsContainer = document.getElementById('resultsContainer');
+            const queryTitle = document.getElementById('queryTitle');
+            const packageList = document.getElementById('packageList');
+
+            queryTitle.textContent = `Results for: ${data.query}`;
+            packageList.innerHTML = '';
+
+            data.results.forEach(pkg => {
+                packageList.innerHTML += `
+                    <div class="border-b border-gray-800 pb-4 last:border-b-0">
+                        <h3 class="text-lg font-semibold arch-blue">${pkg.name}</h3>
+                        <p class="text-gray-300">${pkg.description}</p>
+                        <div class="mt-2 text-sm">
+                            <p><span class="text-arch-blue">Repository:</span> ${pkg.repo}</p>
+                            <p><span class="text-arch-blue">Maintainer:</span> ${pkg.maintainer}</p>
+                            <p><span class="text-arch-blue">Install:</span> ${pkg.install}</p>
+                            <p><span class="text-arch-blue">Similarity:</span> ${pkg.score}</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            resultsContainer.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
