@@ -171,6 +171,7 @@ def paginate_results(results, packages, page_size=5):
 
             print(f"{CYAN}[{idx}]{RESET} {BRIGHT}{YELLOW}{package_name}{RESET}")
             print(f"    {description}")
+            print(f"    {MAGENTA}Installation:{RESET} sudo pacman -S {title_split(package_name)}")
             print(f"    {MAGENTA}Similarity:{RESET} {score:.2f}\n")
 
         # Navigation options
